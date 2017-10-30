@@ -35,7 +35,7 @@ class addAndProcessData(object) :
             pass
         else:
             key = data[0] + data[10][:5]
-            amt = int(data[14])
+            amt = float(data[14])
             if key in dictByZipCode:
                 dictByZipCode[key][3] = dictByZipCode[key][3] + amt
                 dictByZipCode[key][5] += 1
@@ -43,19 +43,19 @@ class addAndProcessData(object) :
                 outputLine = (
                     dictByZipCode[key][0] + "|" + dictByZipCode[key][1] + "|" + str(int(round(dictByZipCode[key][6].findMedian()))) + "|" + str(
                         dictByZipCode[key][5]) + "|" +
-                str(dictByZipCode[key][3]) + "\n")
+                str(int(round(dictByZipCode[key][3]))) + "\n")
                 addAndProcessData.storeInFile(filepath+"medianvals_by_zip.txt",outputLine)
 
             else:
                 medianData = medianCalculate()
                 medianData.addAmtInHeap(int(data[14]))
-                value = [data[0], data[10][:5], data[13], int(data[14]), data[15], 1, medianData]
+                value = [data[0], data[10][:5], data[13], amt, data[15], 1, medianData]
                 dictByZipCode[key] = value
                 outputLine = (
                     dictByZipCode[key][0] + "|" + dictByZipCode[key][1] + "|" + str(
                         int(round(dictByZipCode[key][6].findMedian()))) + "|" + str(
                         dictByZipCode[key][5]) + "|" +
-                    str(dictByZipCode[key][3]) + "\n")
+                    str(int(round(dictByZipCode[key][3]))) + "\n")
                 addAndProcessData.storeInFile(filepath+"medianvals_by_zip.txt",outputLine)
 # method to build dictByDate for every combination of CMPTE_ID and Date with applying necessary  logics and prechecks.
     @staticmethod
@@ -68,7 +68,7 @@ class addAndProcessData(object) :
             pass
         else:
             key = data[0] + data[13]
-            amt = int(data[14])
+            amt = float(data[14])
             if key in dictByDate:
                 dictByDate[key][3] = dictByDate[key][3] + amt
                 dictByDate[key][5] += 1
@@ -77,7 +77,7 @@ class addAndProcessData(object) :
             else:
                 medianData = medianCalculate()
                 medianData.addAmtInHeap(int(data[14]))
-                value = [data[0], data[10][:5], datetime.strptime(data[13], '%m%d%Y'), int(data[14]), data[15], 1, medianData]
+                value = [data[0], data[10][:5], datetime.strptime(data[13], '%m%d%Y'), amt, data[15], 1, medianData]
                 dictByDate[key] = value
 
 #This method stores line in output file
@@ -105,7 +105,7 @@ class addAndProcessData(object) :
         for key in sortedByDateKeys:
             outputLine = (dictByDate[key][0] + "|" + (datetime.date(dictByDate[key][2]).strftime("%m%d%Y")) + "|" + str(
                 int(round(dictByDate[key][6].findMedian()))) + "|"
-                          + str(dictByDate[key][5]) + "|" + str(dictByDate[key][3]) + "\n")
+                          + str(dictByDate[key][5]) + "|" + str(int(round(dictByDate[key][3]))) + "\n")
 
             addAndProcessData.storeInFile(outfilePath+"medianvals_by_date.txt", outputLine)
 
