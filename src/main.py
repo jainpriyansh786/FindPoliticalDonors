@@ -1,7 +1,7 @@
 from heapq import *
 from datetime import datetime
 import sys
-# global dictinaries to store data with key as (CMTE_ID , ZipCode) and (CMTE_ID,Transaction_Date)
+# global dictionaries to store data with key as (CMTE_ID , ZipCode) and (CMTE_ID,Transaction_Date)
 dictByZipCode = {}
 dictByDate = {}
 
