@@ -31,54 +31,64 @@ class addAndProcessData(object) :
     def addZipData(data,filepath):
         #data[10] is Zipcode , data[0] is CMPTE_ID , data[14] is Transaction_Amt
         # conditions to check the proper format of zipcode , transaction_amt and cmpte_id
-        if (len(data[10]) < 5) or (len(data[0]) == 0) or (len(data[14]) == 0):
-            pass
-        else:
-            key = data[0] + data[10][:5]
-            amt = float(data[14])
-            if key in dictByZipCode:
-                dictByZipCode[key][3] = dictByZipCode[key][3] + amt
-                dictByZipCode[key][5] += 1
-                dictByZipCode[key][6].addAmtInHeap(amt)
-                outputLine = (
-                    dictByZipCode[key][0] + "|" + dictByZipCode[key][1] + "|" + str(int(round(dictByZipCode[key][6].findMedian()))) + "|" + str(
-                        dictByZipCode[key][5]) + "|" +
-                str(int(round(dictByZipCode[key][3]))) + "\n")
-                addAndProcessData.storeInFile(filepath+"medianvals_by_zip.txt",outputLine)
-
+       # try:
+            if (len(data[10]) < 5) or (len(data[0]) == 0) or (len(data[14]) == 0):
+                pass
             else:
-                medianData = medianCalculate()
-                medianData.addAmtInHeap(int(data[14]))
-                value = [data[0], data[10][:5], data[13], amt, data[15], 1, medianData]
-                dictByZipCode[key] = value
-                outputLine = (
-                    dictByZipCode[key][0] + "|" + dictByZipCode[key][1] + "|" + str(
-                        int(round(dictByZipCode[key][6].findMedian()))) + "|" + str(
-                        dictByZipCode[key][5]) + "|" +
-                    str(int(round(dictByZipCode[key][3]))) + "\n")
-                addAndProcessData.storeInFile(filepath+"medianvals_by_zip.txt",outputLine)
-# method to build dictByDate for every combination of CMPTE_ID and Date with applying necessary  logics and prechecks.
+                key = data[0] + data[10][:5]
+                amt = float(data[14])
+                if key in dictByZipCode:
+                    dictByZipCode[key][3] = dictByZipCode[key][3] + amt
+                    dictByZipCode[key][5] += 1
+                    dictByZipCode[key][6].addAmtInHeap(amt)
+                    outputLine = (
+                        dictByZipCode[key][0] + "|" + dictByZipCode[key][1] + "|" + str(
+                            int(round(dictByZipCode[key][6].findMedian()))) + "|" + str(
+                            dictByZipCode[key][5]) + "|" +
+                        str(int(round(dictByZipCode[key][3]))) + "\n")
+                    addAndProcessData.storeInFile(filepath + "medianvals_by_zip.txt", outputLine)
+
+                else:
+                    medianData = medianCalculate()
+                    medianData.addAmtInHeap(int(data[14]))
+                    value = [data[0], data[10][:5], data[13], amt, data[15], 1, medianData]
+                    dictByZipCode[key] = value
+                    outputLine = (
+                        dictByZipCode[key][0] + "|" + dictByZipCode[key][1] + "|" + str(
+                            int(round(dictByZipCode[key][6].findMedian()))) + "|" + str(
+                            dictByZipCode[key][5]) + "|" +
+                        str(int(round(dictByZipCode[key][3]))) + "\n")
+                    addAndProcessData.storeInFile(filepath + "medianvals_by_zip.txt", outputLine)
+                    # method to build dictByDate for every combination of CMPTE_ID and Date with applying necessary  logics and prechecks.
+       # except:
+           # print("error in record , record ignored ", data)
+        #   return
+
+
     @staticmethod
     def addDateData(data):
 
 # the conditions checks the proper date format (mmddyyyy) and if amt and cmpte_id is empty or not
-        if addAndProcessData.dateFormatCheck(data[13]) or (len(data[0]) == 0) or (len(data[14]) == 0):
 
-
-            pass
-        else:
-            key = data[0] + data[13]
-            amt = float(data[14])
-            if key in dictByDate:
+        #try:
+          if addAndProcessData.dateFormatCheck(data[13]) or (len(data[0]) == 0) or (len(data[14]) == 0):
+              pass
+          else:
+              key = data[0] + data[13]
+              amt = float(data[14])
+              if key in dictByDate:
                 dictByDate[key][3] = dictByDate[key][3] + amt
                 dictByDate[key][5] += 1
                 dictByDate[key][6].addAmtInHeap(amt)
 
-            else:
+              else:
                 medianData = medianCalculate()
                 medianData.addAmtInHeap(int(data[14]))
                 value = [data[0], data[10][:5], datetime.strptime(data[13], '%m%d%Y'), amt, data[15], 1, medianData]
                 dictByDate[key] = value
+        #except:
+         #   print("error in record , record ignored")
+          #   return
 
 #This method stores line in output file
     @staticmethod
@@ -113,20 +123,24 @@ class addAndProcessData(object) :
 
 
 def main(argv):
+
     inputFilePath = argv[1]
     outputFilePath = argv[2]
+
     with open(inputFilePath) as f:
        for line in f:
-           data = line.split("|")
-#condition to check other_id field
+           try:
+               data = line.split("|")
+               # condition to check other_id field
+               if data[15]:
+                   continue
 
-           if  data[15]  :
+               else:
+
+                   addAndProcessData.addZipData(data, outputFilePath)
+                   addAndProcessData.addDateData(data)
+           except:
                continue
-
-           else :
-
-               addAndProcessData.addZipData(data,outputFilePath)
-               addAndProcessData.addDateData(data)
        addAndProcessData.sortAndPrintDataByData(outputFilePath)
 
 if __name__ == "__main__":
